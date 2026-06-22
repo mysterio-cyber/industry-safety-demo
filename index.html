@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafetyIQ — Industrial Safety Intelligence</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a18;min-height:100vh;}
+.dash{max-width:1100px;margin:0 auto;padding:1.5rem;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-dot{width:10px;height:10px;border-radius:50%;background:#E24B4A;animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.brand-name{font-size:16px;font-weight:500;color:#1a1a18;}
+.brand-sub{font-size:12px;color:#5F5E5A;margin-left:20px;}
+.live-tag{font-size:11px;background:#FCEBEB;color:#A32D2D;padding:3px 10px;border-radius:20px;font-weight:500;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;}
+.metric{background:#ebe9e1;border-radius:8px;padding:0.85rem 1rem;}
+.metric-label{font-size:11px;color:#5F5E5A;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;}
+.metric-val{font-size:22px;font-weight:500;color:#1a1a18;}
+.metric-val.danger{color:#A32D2D;}
+.metric-val.warn{color:#854F0B;}
+.metric-val.ok{color:#3B6D11;}
+.metric-delta{font-size:11px;color:#5F5E5A;margin-top:3px;}
+.main-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:12px;margin-bottom:12px;}
+.card{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:1rem 1.2rem;}
+.card-title{font-size:13px;font-weight:500;color:#5F5E5A;margin-bottom:0.85rem;display:flex;align-items:center;gap:7px;}
+.card-title i{font-size:15px;}
+.alert-item{display:flex;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.08);}
+.alert-item:last-of-type{border-bottom:none;padding-bottom:0;}
+.alert-sev{width:6px;border-radius:3px;flex-shrink:0;}
+.sev-critical{background:#E24B4A;}
+.sev-high{background:#EF9F27;}
+.sev-med{background:#378ADD;}
+.alert-title{font-size:13px;font-weight:500;color:#1a1a18;margin-bottom:2px;}
+.alert-desc{font-size:12px;color:#5F5E5A;line-height:1.4;}
+.alert-meta{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+.alert-zone{font-size:11px;color:#888780;}
+.alert-time{font-size:11px;color:#888780;margin-top:2px;}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;}
+.badge-critical{background:#FCEBEB;color:#791F1F;}
+.badge-high{background:#FAEEDA;color:#633806;}
+.badge-compound{background:#EEEDFE;color:#3C3489;}
+.plant-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.plant-legend{display:flex;gap:12px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#5F5E5A;}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.plant-map{width:100%;height:220px;background:#ebe9e1;border-radius:8px;overflow:hidden;}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.permit-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.08);}
+.permit-row:last-of-type{border-bottom:none;}
+.permit-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.permit-name{font-size:12px;font-weight:500;color:#1a1a18;}
+.permit-zone{font-size:11px;color:#5F5E5A;}
+.permit-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap;}
+.ps-conflict{background:#FCEBEB;color:#791F1F;}
+.ps-active{background:#EAF3DE;color:#27500A;}
+.ps-pending{background:#FAEEDA;color:#633806;}
+.sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sensor-card{background:#ebe9e1;border-radius:8px;padding:10px 12px;}
+.sensor-name{font-size:11px;color:#5F5E5A;margin-bottom:4px;}
+.sensor-reading{font-size:17px;font-weight:500;}
+.sensor-bar{height:3px;border-radius:2px;background:rgba(0,0,0,0.1);margin-top:6px;}
+.sensor-fill{height:100%;border-radius:2px;}
+.sensor-note{font-size:10px;margin-top:4px;}
+.section-divider{display:flex;align-items:center;gap:8px;margin:1.1rem 0 0.75rem;}
+.section-divider span{font-size:11px;font-weight:500;color:#5F5E5A;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:0.5px;background:rgba(0,0,0,0.1);}
+.tl-item{display:flex;gap:10px;margin-bottom:10px;}
+.tl-dot-col{display:flex;flex-direction:column;align-items:center;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.tl-line{width:1px;background:rgba(0,0,0,0.1);flex:1;margin:3px 0;}
+.tl-time{font-size:11px;color:#888780;margin-bottom:1px;}
+.tl-event{font-size:12px;color:#1a1a18;}
+.action-row{display:flex;gap:8px;margin-top:1rem;}
+.action-btn{flex:1;padding:8px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.2);background:#fff;font-size:12px;font-weight:500;color:#1a1a18;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background 0.15s;}
+.action-btn:hover{background:#ebe9e1;}
+.action-btn.primary{background:#E24B4A;color:#fff;border-color:#E24B4A;}
+.action-btn.primary:hover{background:#A32D2D;}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:1.5rem;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;position:relative;}
+.modal-title{font-size:15px;font-weight:500;margin-bottom:0.75rem;color:#1a1a18;}
+.modal-body{font-size:13px;color:#5F5E5A;line-height:1.7;}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#888780;}
+.modal-loading{display:flex;align-items:center;gap:8px;font-size:13px;color:#5F5E5A;}
+.spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,0.1);border-top-color:#E24B4A;border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:700px){
+  .metrics{grid-template-columns:1fr 1fr;}
+  .main-grid{grid-template-columns:1fr;}
+  .bottom-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="dash">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span class="brand-name">SafetyIQ — Industrial Intelligence</span>
+      <span class="brand-sub">Visakhapatnam Steel Plant · Unit 3 · Coke Oven Battery</span>
+    </div>
+    <span class="live-tag"><i class="ti ti-radio" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Live</span>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Compound risk alerts</div>
+      <div class="metric-val danger">3</div>
+      <div class="metric-delta"><i class="ti ti-arrow-up" style="font-size:11px;vertical-align:-1px;"></i> 2 new in last 30 min</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Active permits</div>
+      <div class="metric-val warn">7</div>
+      <div class="metric-delta">2 flagged for conflict</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Workers in hazard zones</div>
+      <div class="metric-val danger">12</div>
+      <div class="metric-delta">Evacuation advisory pending</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Prediction lead time</div>
+      <div class="metric-val ok">94 min</div>
+      <div class="metric-delta">Before threshold breach</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-alert-triangle"></i> Compound risk alerts</div>
+
+      <div class="alert-item">
+        <div class="alert-sev sev-critical"></div>
+        <div style="flex:1;">
+          <div class="alert-title">Gas accumulation + confined space entry</div>
+          <div class="alert-desc">CO reading 340 ppm (threshold 50 ppm) in Battery 7 while PTW-2204 authorises maintenance crew entry. Compounding factor: shift changeover at 14:30.</div>
+          <div class="alert-meta">
+            <span class="alert-zone">Zone B7 · Oven chamber 14–19</span>
+            <span class="badge badge-critical">Critical</span>
+          </div>
+          <div class="alert-time">Detected 13:47 · 94 min lead time</div>
+        </div>
+      </div>
+
+      <div class="alert-item">
+        <div class="alert-sev sev-high"></div>
+        <div style="flex:1;">
+          <div class="alert-title">Hot work permit near elevated H₂S zone</div>
+          <div class="alert-desc">PTW-2207 (hot work, Zone C) issued while gas sensor GS-19 reads H₂S at 18 ppm — 36% above the 10-minute ceiling. No isolation confirmed.</div>
+          <div class="alert-meta">
+            <span class="alert-zone">Zone C · Pipeline junction</span>
+            <span class="badge badge-high">High</span>
+          </div>
+          <div class="alert-time">Detected 14:02 · 79 min lead time</div>
+        </div>
+      </div>
+
+      <div class="alert-item">
+        <div class="alert-sev sev-med"></div>
+        <div style="flex:1;">
+          <div class="alert-title">Pattern match: near-miss recurrence</div>
+          <div class="alert-desc">RAG engine cross-referenced 3 near-miss reports (2021–23) with current conditions. Identical compound pattern preceded Q2 2022 incident.</div>
+          <div class="alert-meta">
+            <span class="alert-zone">Incident pattern · OISD-116 ref</span>
+            <span class="badge badge-compound">Compound</span>
+          </div>
+          <div class="alert-time">Detected 13:51 · Pattern confidence 87%</div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="action-btn primary" onclick="askClaude('Trigger emergency response orchestration for Battery 7 compound risk alert. Provide step-by-step evacuation protocol, team notifications, and a preliminary OISD-116 compliant incident report.')"><i class="ti ti-siren"></i> Trigger response</button>
+        <button class="action-btn" onclick="askClaude('Show similar historical incidents and OISD regulatory guidance for a compound risk pattern involving CO accumulation and confined space entry during shift changeover.')"><i class="ti ti-history"></i> Check history</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="plant-header">
+        <div class="card-title" style="margin-bottom:0;"><i class="ti ti-map-2"></i> Geospatial safety heatmap</div>
+        <div class="plant-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#E24B4A;"></div>Critical</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EF9F27;"></div>High</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#639922;"></div>Clear</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3C3489;"></div>Worker</div>
+        </div>
+      </div>
+      <div class="plant-map">
+        <svg width="100%" height="100%" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="12" width="110" height="60" rx="4" fill="#FCEBEB" stroke="#F09595" stroke-width="0.5"/>
+          <text x="69" y="36" text-anchor="middle" font-size="10" font-weight="500" fill="#791F1F">Battery 7</text>
+          <text x="69" y="50" text-anchor="middle" font-size="9" fill="#A32D2D">Coke Oven</text>
+          <text x="69" y="62" text-anchor="middle" font-size="9" fill="#A32D2D">CO: 340 ppm ⚠</text>
+          <circle cx="38" cy="82" r="4" fill="#3C3489" opacity="0.85"/>
+          <circle cx="52" cy="84" r="4" fill="#3C3489" opacity="0.85"/>
+          <circle cx="64" cy="80" r="4" fill="#3C3489" opacity="0.85"/>
+          <circle cx="78" cy="85" r="4" fill="#3C3489" opacity="0.85"/>
+          <rect x="140" y="12" width="100" height="60" rx="4" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+          <text x="190" y="36" text-anchor="middle" font-size="10" font-weight="500" fill="#633806">Zone C</text>
+          <text x="190" y="50" text-anchor="middle" font-size="9" fill="#854F0B">Pipeline junc.</text>
+          <text x="190" y="62" text-anchor="middle" font-size="9" fill="#854F0B">H₂S: 18 ppm</text>
+          <circle cx="158" cy="82" r="4" fill="#3C3489" opacity="0.85"/>
+          <circle cx="172" cy="84" r="4" fill="#3C3489" opacity="0.85"/>
+          <rect x="258" y="12" width="100" height="60" rx="4" fill="#EAF3DE" stroke="#C0DD97" stroke-width="0.5"/>
+          <text x="308" y="36" text-anchor="middle" font-size="10" font-weight="500" fill="#27500A">Zone D</text>
+          <text x="308" y="50" text-anchor="middle" font-size="9" fill="#3B6D11">Gas recovery</text>
+          <text x="308" y="62" text-anchor="middle" font-size="9" fill="#3B6D11">All clear</text>
+          <rect x="376" y="12" width="100" height="60" rx="4" fill="#EAF3DE" stroke="#C0DD97" stroke-width="0.5"/>
+          <text x="426" y="36" text-anchor="middle" font-size="10" font-weight="500" fill="#27500A">Zone E</text>
+          <text x="426" y="50" text-anchor="middle" font-size="9" fill="#3B6D11">By-product</text>
+          <text x="426" y="62" text-anchor="middle" font-size="9" fill="#3B6D11">All clear</text>
+          <rect x="14" y="105" width="462" height="50" rx="4" fill="#F1EFE8" stroke="#D3D1C7" stroke-width="0.5"/>
+          <text x="245" y="127" text-anchor="middle" font-size="10" font-weight="500" fill="#5F5E5A">Main access corridor / evacuation route</text>
+          <text x="245" y="143" text-anchor="middle" font-size="9" fill="#888780">Primary egress path — keep clear</text>
+          <rect x="14" y="165" width="110" height="48" rx="4" fill="#EAF3DE" stroke="#C0DD97" stroke-width="0.5"/>
+          <text x="69" y="184" text-anchor="middle" font-size="10" font-weight="500" fill="#27500A">Control room</text>
+          <text x="69" y="198" text-anchor="middle" font-size="9" fill="#3B6D11">Monitoring</text>
+          <rect x="140" y="165" width="100" height="48" rx="4" fill="#EAF3DE" stroke="#C0DD97" stroke-width="0.5"/>
+          <text x="190" y="184" text-anchor="middle" font-size="10" font-weight="500" fill="#27500A">Workshop</text>
+          <text x="190" y="198" text-anchor="middle" font-size="9" fill="#3B6D11">Maintenance</text>
+          <rect x="258" y="165" width="100" height="48" rx="4" fill="#E6F1FB" stroke="#B5D4F4" stroke-width="0.5"/>
+          <text x="308" y="184" text-anchor="middle" font-size="10" font-weight="500" fill="#0C447C">SCADA node</text>
+          <text x="308" y="198" text-anchor="middle" font-size="9" fill="#185FA5">Sensor hub</text>
+          <circle cx="100" cy="42" r="7" fill="none" stroke="#E24B4A" stroke-width="1.5" opacity="0.6">
+            <animate attributeName="r" values="7;14;7" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="100" cy="42" r="4" fill="#E24B4A"/>
+          <circle cx="220" cy="42" r="7" fill="none" stroke="#EF9F27" stroke-width="1.5" opacity="0.6">
+            <animate attributeName="r" values="7;13;7" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="220" cy="42" r="4" fill="#EF9F27"/>
+          <line x1="480" y1="42" x2="308" y2="189" stroke="#D3D1C7" stroke-width="0.5" stroke-dasharray="3,3"/>
+          <circle cx="480" cy="42" r="5" fill="#378ADD"/>
+          <text x="490" y="46" font-size="9" fill="#185FA5">IoT feed</text>
+          <circle cx="308" cy="189" r="5" fill="#378ADD"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-file-check"></i> Digital permit intelligence</div>
+      <div class="permit-row">
+        <div class="permit-icon" style="background:#FCEBEB;"><i class="ti ti-flame" style="color:#791F1F;"></i></div>
+        <div style="flex:1;">
+          <div class="permit-name">PTW-2207 · Hot work</div>
+          <div class="permit-zone">Zone C · Pipeline junction · Issued 13:30</div>
+        </div>
+        <span class="permit-status ps-conflict">Conflict</span>
+      </div>
+      <div class="permit-row">
+        <div class="permit-icon" style="background:#FCEBEB;"><i class="ti ti-door-enter" style="color:#791F1F;"></i></div>
+        <div style="flex:1;">
+          <div class="permit-name">PTW-2204 · Confined space</div>
+          <div class="permit-zone">Battery 7 · Chamber 14-19 · Issued 13:15</div>
+        </div>
+        <span class="permit-status ps-conflict">Conflict</span>
+      </div>
+      <div class="permit-row">
+        <div class="permit-icon" style="background:#EAF3DE;"><i class="ti ti-tool" style="color:#27500A;"></i></div>
+        <div style="flex:1;">
+          <div class="permit-name">PTW-2201 · Routine maintenance</div>
+          <div class="permit-zone">Zone D · Gas recovery · Issued 08:00</div>
+        </div>
+        <span class="permit-status ps-active">Active</span>
+      </div>
+      <div class="permit-row">
+        <div class="permit-icon" style="background:#FAEEDA;"><i class="ti ti-crane" style="color:#633806;"></i></div>
+        <div style="flex:1;">
+          <div class="permit-name">PTW-2210 · Crane operation</div>
+          <div class="permit-zone">Zone E · By-product plant · Pending approval</div>
+        </div>
+        <span class="permit-status ps-pending">Pending</span>
+      </div>
+      <div class="action-row" style="margin-top:10px;">
+        <button class="action-btn" onclick="askClaude('Analyse all active permits against current gas sensor readings and OISD-116 guidelines. Flag any dangerous simultaneous operations and recommend immediate actions.')"><i class="ti ti-search"></i> Full permit audit</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="ti ti-activity"></i> Live sensor readings</div>
+      <div class="sensor-grid">
+        <div class="sensor-card">
+          <div class="sensor-name">CO · Battery 7 (GS-12)</div>
+          <div class="sensor-reading" style="color:#A32D2D;">340 ppm</div>
+          <div class="sensor-bar"><div class="sensor-fill" style="width:94%;background:#E24B4A;"></div></div>
+          <div class="sensor-note" style="color:#A32D2D;">Threshold: 50 ppm · CRITICAL</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-name">H₂S · Zone C (GS-19)</div>
+          <div class="sensor-reading" style="color:#854F0B;">18 ppm</div>
+          <div class="sensor-bar"><div class="sensor-fill" style="width:72%;background:#EF9F27;"></div></div>
+          <div class="sensor-note" style="color:#854F0B;">Ceiling: 10 ppm · HIGH</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-name">CH₄ · Zone D (GS-08)</div>
+          <div class="sensor-reading" style="color:#3B6D11;">1.2% LEL</div>
+          <div class="sensor-bar"><div class="sensor-fill" style="width:12%;background:#639922;"></div></div>
+          <div class="sensor-note" style="color:#3B6D11;">Threshold: 10% LEL · Safe</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-name">O₂ · Battery 7 (GS-14)</div>
+          <div class="sensor-reading" style="color:#A32D2D;">16.4%</div>
+          <div class="sensor-bar"><div class="sensor-fill" style="width:40%;background:#E24B4A;"></div></div>
+          <div class="sensor-note" style="color:#A32D2D;">Safe: ≥19.5% · DEFICIENT</div>
+        </div>
+      </div>
+
+      <div class="section-divider"><span>Incident timeline — today</span></div>
+      <div>
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot" style="background:#E24B4A;"></div><div class="tl-line"></div></div>
+          <div style="flex:1;padding-bottom:6px;"><div class="tl-time">13:47</div><div class="tl-event">Compound risk detected — CO + confined space PTW overlap in Battery 7</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot" style="background:#EF9F27;"></div><div class="tl-line"></div></div>
+          <div style="flex:1;padding-bottom:6px;"><div class="tl-time">13:51</div><div class="tl-event">RAG engine matched pattern to Q2 2022 near-miss incident (87% confidence)</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot" style="background:#EF9F27;"></div><div class="tl-line"></div></div>
+          <div style="flex:1;padding-bottom:6px;"><div class="tl-time">14:02</div><div class="tl-event">Hot work permit PTW-2207 flagged — H₂S elevation in Zone C, no isolation</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot" style="background:#378ADD;"></div></div>
+          <div style="flex:1;"><div class="tl-time">14:08</div><div class="tl-event">Safety officer notified. Awaiting permit suspension confirmation.</div></div>
+        </div>
+      </div>
+
+      <div class="action-row" style="margin-top:10px;">
+        <button class="action-btn" onclick="askClaude('Generate a regulatory-compliant preliminary incident report for the Battery 7 compound risk event under OISD-116 and Factories Act 1948 format. Include sensor readings, permit details, and recommended corrective actions.')"><i class="ti ti-file-report"></i> Draft incident report</button>
+        <button class="action-btn primary" onclick="askClaude('Initiate emergency evacuation protocol for Battery 7 and Zone C. List all immediate steps, team notifications required, and how to preserve sensor evidence log per DGFASLI requirements.')"><i class="ti ti-alert-triangle"></i> Escalate now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">&times;</button>
+    <div class="modal-title" id="modal-title">SafetyIQ AI Response</div>
+    <div class="modal-body" id="modal-body">
+      <div class="modal-loading"><div class="spinner"></div> Analysing plant conditions...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function askClaude(prompt) {
+  const modal = document.getElementById('modal');
+  const body = document.getElementById('modal-body');
+  modal.classList.add('open');
+  body.innerHTML = '<div class="modal-loading"><div class="spinner"></div> Analysing plant conditions...</div>';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'You are SafetyIQ, an AI industrial safety intelligence system at Visakhapatnam Steel Plant. You specialise in OISD-116, DGMS, and Factories Act 1948 compliance. Current sensor data: CO at 340 ppm (threshold 50 ppm) in Battery 7; H2S at 18 ppm (ceiling 10 ppm) in Zone C; O2 at 16.4% (deficient) in Battery 7. Active conflicting permits: PTW-2204 (confined space, Battery 7) and PTW-2207 (hot work, Zone C). 12 workers in hazard zones. Shift changeover at 14:30. Respond concisely and actionably with numbered steps where appropriate.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b => b.text || '').join('');
+    body.innerHTML = text.replace(/\n/g, '<br>');
+  } catch(e) {
+    body.innerHTML = '<span style="color:#A32D2D;">Unable to reach AI service. Check your network connection or API key configuration.</span>';
+  }
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+</script>
+</body>
+</html>
