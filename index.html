@@ -16,6 +16,14 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a
 .brand-name{font-size:16px;font-weight:500;color:#1a1a18;}
 .brand-sub{font-size:12px;color:#5F5E5A;margin-left:20px;}
 .live-tag{font-size:11px;background:#FCEBEB;color:#A32D2D;padding:3px 10px;border-radius:20px;font-weight:500;}
+
+/* API Key Bar */
+.apikey-bar{display:flex;align-items:center;gap:10px;background:#ebe9e1;border-radius:8px;padding:10px 14px;margin-bottom:1.25rem;}
+.apikey-bar label{font-size:12px;color:#5F5E5A;white-space:nowrap;font-weight:500;}
+.apikey-bar input{flex:1;font-size:12px;padding:6px 10px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;color:#1a1a18;outline:none;font-family:monospace;}
+.apikey-bar input:focus{border-color:#378ADD;}
+.apikey-bar .key-hint{font-size:11px;color:#888780;white-space:nowrap;}
+
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;}
 .metric{background:#ebe9e1;border-radius:8px;padding:0.85rem 1rem;}
 .metric-label{font-size:11px;color:#5F5E5A;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;}
@@ -107,6 +115,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a
       <span class="brand-sub">Visakhapatnam Steel Plant · Unit 3 · Coke Oven Battery</span>
     </div>
     <span class="live-tag"><i class="ti ti-radio" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Live</span>
+  </div>
+
+  <!-- API Key Input -->
+  <div class="apikey-bar">
+    <label for="apikey-input"><i class="ti ti-key" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Anthropic API Key</label>
+    <input type="password" id="apikey-input" placeholder="sk-ant-..." autocomplete="off" spellcheck="false"/>
+    <span class="key-hint">Used only in this browser session</span>
   </div>
 
   <div class="metrics">
@@ -356,6 +371,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a
 
 <script>
 async function askClaude(prompt) {
+  const apiKey = document.getElementById('apikey-input').value.trim();
+  if (!apiKey) {
+    alert('Please enter your Anthropic API key in the field at the top of the page.');
+    return;
+  }
+
   const modal = document.getElementById('modal');
   const body = document.getElementById('modal-body');
   modal.classList.add('open');
@@ -364,7 +385,12 @@ async function askClaude(prompt) {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
@@ -373,10 +399,14 @@ async function askClaude(prompt) {
       })
     });
     const data = await res.json();
+    if (data.error) {
+      body.innerHTML = '<span style="color:#A32D2D;">API error: ' + data.error.message + '</span>';
+      return;
+    }
     const text = data.content.map(b => b.text || '').join('');
     body.innerHTML = text.replace(/\n/g, '<br>');
   } catch(e) {
-    body.innerHTML = '<span style="color:#A32D2D;">Unable to reach AI service. Check your network connection or API key configuration.</span>';
+    body.innerHTML = '<span style="color:#A32D2D;">Unable to reach AI service. Check your API key and network connection.</span>';
   }
 }
 
